@@ -1,0 +1,1157 @@
+# bot website: https://discord.com/developers/applications/960900411445899274/bot
+# applications website: https://discord.com/developers/applications
+
+
+# imports
+from discord import *
+import random
+from datetime import *
+import requests
+from bs4 import BeautifulSoup
+import os
+import discord.ext
+from twilio.rest import Client
+from pythmc import ChatLink
+from pythmc import GameLink
+
+
+# variables
+debatex = 'false'  # variable made true when the !debate function is called
+gamex = 'false'  # variable made true when the !game function is called
+coinx = 'false'  # variable made true when the coin game option is chosen
+rpsx = 'false'  # variable made true when the rock, paper, scissors game option is chosen
+tttx = 'false'  # variable made true when the Tic-Tac-Toe game option is chosen
+timex = 'false'  # variable made true when the !time function is called
+weatherx = 'false'  # variable made true when the !weather function is called
+player1x = 'false'  # variable made true when player 1 enters their name in the Tic-Tac-Toe game
+player2x = 'false'  # variable made true when player 2 enters their name in the Tic-Tac-Toe game
+playersolo = 'false'  # variable made true when the player enters their name in the Tic-Tac-Toe vs Kidney game
+ttt1 = '+'  # variable used for the Tic-Tac-Toe board
+ttt2 = '+'  # variable used for the Tic-Tac-Toe board
+ttt3 = '+'  # variable used for the Tic-Tac-Toe board
+ttt4 = '+'  # variable used for the Tic-Tac-Toe board
+ttt5 = '+'  # variable used for the Tic-Tac-Toe board
+ttt6 = '+'  # variable used for the Tic-Tac-Toe board
+ttt7 = '+'  # variable used for the Tic-Tac-Toe board
+ttt8 = '+'  # variable used for the Tic-Tac-Toe board
+ttt9 = '+'  # variable used for the Tic-Tac-Toe board
+ask1 = 'false'  # variable made true when it's player 1's turn
+ask2 = 'false'  # variable made true when it's player 2's turn
+turn1 = 'false'  # variable made true after player 1 goes, used to update the Tic-Tac-Toe board
+turn2 = 'false'  # variable made true after player 2 goes, used to update the Tic-Tac-Toe board
+channel_check = 'false'  # variable made true whenever a function required a response is called
+channel_name = "placeholder"  # becomes the name of the channel that is being used when channel_check is 'true'
+kkx = 'false'  # variable used for the !knock knock function
+kky = 'false'  # variable used for the !knock knock function
+recent_question = "placeholder"  # becomes the most recent string that includes 'kidney' and '?'. Used to stop repeating questions.
+play_k = 'false'  # variable used so 'kidney' only starts a Tic-Tac-Toe game when appropriate
+ask3 = 'false'  # variable made true when it's player's turn against Kidney
+turn3 = 'false'  # variable made true after player's turn against Kidney, used to update the Tic-Tac-Toe board
+ttt_mode = 'placeholder'  # becomes the Tic-Tac-Toe mode. 'Player' or 'Kidney'
+winner = 'placeholder'  # becomes the player name of whoever won the most recent Tic-Tac-Toe game
+
+# discord bot variables
+TOKEN = 'OTYwOTAwNDExNDQ1ODk5Mjc0.GMVs5r.CarsgrhKEmvTJK4HaWUdfWrYR4nYF3fBs9nSF8'
+client = discord.Client()
+
+# minecraft bot variables
+chat = ChatLink()
+clientmc = GameLink()
+
+# Twilio variables
+clienttxt = Client("ACa1cc05dfe14db3febfd9afc89c354fb8", "87ae26ef5c6240671764d0aa42ec2fe3")
+
+
+# when Kidney boots up
+@client.event
+async def on_ready():
+    print('We have logged in as {0.user}'.format(client))  # sends the message in console when Kidney has successfully logged in
+    #channel = client.get_channel(977043185471729665)  # sets the channel do 'bot-spam'
+    #await channel.send("I'm back, did you miss me?")  # sends the message in the bot-spam channel
+
+
+# when a message is sent on discord
+@client.event
+async def on_message(message):
+    username = str(message.author).split('#')[0]  # gets the username of the message sender
+    user_message = str(message.content)  # gets the message itself
+    channel = str(message.channel.name)  # gets the channel of the message
+    user_id = message.author.id  # gets the id of the message sender
+    print(f'{username}: {user_message} ({channel})')  # prints the username, message, and channel in the Python console
+    responded = 'false'  # variable becomes true if Kidney responds to a message. Set back to false with every new message.
+
+    # if the message is from Kidney, it will return. Kidney won't respond to beep's own message.
+    if message.author == client.user:
+        return
+
+    # controlling minecraft in this discord channel only
+    if channel == 'veggies-test-channel':
+        if user_message.lower() == "!help":
+            await message.channel.send("Jump \nAttack \nPlace \nEat \nMine **# of seconds** \nForward **# of blocks** \nRight **# of blocks** \nLeft **# of blocks** \nBack **# of blocks** \nHotbar **# slot**")
+        if user_message.lower() == "jump":
+            clientmc.walk(jumping=True)
+        if user_message.lower() == "attack":
+            clientmc.destroy()
+        if user_message.lower() == "place":
+            clientmc.click()
+        if user_message.lower() == 'eat':
+            clientmc.use(duration=1.62)
+        if "mine" in user_message.lower():
+            user_message = user_message.split('mine')
+            mcvariable = user_message[1]
+            clientmc.destroy(duration=int(mcvariable))
+        if "forward" in user_message.lower():
+            user_message = user_message.split('forward ')
+            mcvariable = user_message[1]
+            clientmc.walk('fwd', blocks=int(mcvariable))
+        if "right" in user_message.lower():
+            user_message = user_message.split('right ')
+            mcvariable = user_message[1]
+            clientmc.walk('right', blocks=int(mcvariable))
+        if "left" in user_message.lower():
+            user_message = user_message.split('left ')
+            mcvariable = user_message[1]
+            clientmc.walk('left', blocks=int(mcvariable))
+        if "back" in user_message.lower():
+            user_message = user_message.split('back ')
+            mcvariable = user_message[1]
+            clientmc.walk('bwd', blocks=int(mcvariable))
+        if "hotbar" in user_message.lower():
+            user_message = user_message.split('hotbar ')
+            mcvariable = user_message[1]
+            clientmc.hotbar(int(mcvariable))
+
+
+    # If it's the 'dm' channel in my private server, it will text my phone the message.
+    if channel == 'dm':
+        try:
+            clienttxt.messages.create(to="+14435186294",
+                                      from_="+14342312497",
+                                      body=user_message)
+        except:
+            pass
+        return
+
+    # If it's the 'kidney-input' channel in my private server, I can make Kidney speak.
+    if channel == 'kidney-input':
+        try:
+            retrieved = user_message.split('!')
+            words = retrieved[0]
+            channel = client.get_channel(int(retrieved[1]))
+            await channel.send(words)
+        except:
+            channel = client.get_channel(978318307360907264)
+            await channel.send('Incorrect format')
+        return
+
+    # Kidney only reads umbc messages
+    #if channel != 'umbc-peeps':
+    #    return
+
+    # makes all the variables global. probably not necessary but I did it.
+    global debatex
+    global gamex
+    global coinx
+    global rpsx
+    global tttx
+    global timex
+    global weatherx
+    global player1x
+    global player2x
+    global player1
+    global player2
+    global playersolo
+    global ttt1
+    global ttt2
+    global ttt3
+    global ttt4
+    global ttt5
+    global ttt6
+    global ttt7
+    global ttt8
+    global ttt9
+    global ask1
+    global ask2
+    global turn1
+    global turn2
+    global channel_check
+    global channel_name
+    global kkx
+    global kky
+    global recent_question
+    global play_k
+    global ask3
+    global turn3
+    global player
+    global ttt_mode
+    global winner
+
+    # spring classes
+    if user_message.lower() == "!spring":
+        class_list = [
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=1885",
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=1626",
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=1178",
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=2451",
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=2816",
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=4306",
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=2776",
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=4063",
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=2432",
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=2629",
+            "https://csprd-web.psg.umbc.edu/psc/ps/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_DETAILS.FieldFormula.IScript_Main?institution=UMBC1&term=2232&class_nbr=3707"]
+        name_list = ["Jonathans:\nC++", "Discrete Structures", "Management", "Music", "Sociology",
+                     "Bens:\nMicroeconomics", "Philosphy", "Visual Concepts III", "Visual Concepts IV",
+                     "Psych", "Anthpo"]
+
+        j = 0
+        for i in class_list:
+            URL = i
+            page = requests.get(URL)
+            page_text = page.text
+            real_words = page_text.split('"enrollment_available":')
+            real_words = real_words[1].split(',"wait_list_capacity":')
+            if int(real_words[0]) > 0:
+                await message.channel.send(f"{name_list[j]} has {real_words[0]} seats left")
+            else:
+                page = requests.get(URL)
+                page_text = page.text
+                real_words = page_text.split('"wait_list_total":"')
+                real_words = real_words[1].split('"},"reserve_caps":[],"is_combin')
+                await message.channel.send(f"{name_list[j]} has {real_words[0]} waitlisted seats left")
+            j += 1
+
+    # umbc schedules
+    if user_message.lower() == "!open":
+        #gets date and time
+        now = datetime.now()
+        hour = int(now.strftime('%H'))
+        minute = int(now.strftime('%M'))
+        time = (f"{hour}{minute}")
+        time = int(time)
+        today = str(datetime.today().weekday())
+        Jonathan = "out of class"
+        Ben = "out of class"
+        Bethany = "out of class"
+        Clare = "out of class"
+        Keira = "out of class"
+        Joseph = "out of class"
+        Mason = "out of class"
+        if minute in range(0,10):
+            await message.channel.send(f"I'm broken rn, try again at {hour}:10")
+            return
+        if today == "5":
+            await message.channel.send("Dude it's the weekend idk")
+            return
+        if today == "6":
+            await message.channel.send("Dude it's the weekend idk")
+            return
+        if today == "0":  # Monday
+            if time in range(1000,1115) or time in range(1300,1415) or time in range(1600,1700):
+                Jonathan = "in class"
+            if time in range(900,1100) or time in range(1430,1545):
+                Ben = "in class"
+            if time in range(1000,1115) or time in range(1430,1715):
+                Bethany = "in class"
+            if time in range(1000,1200) or time in range(1300,1500):
+                Clare = "in class"
+            if time in range(1000,1100) or time in range(1300,1415):
+                Keira = "in class"
+            if time in range(900,1000) or time in range(1500,1600) or time in range (1100,1130) or time in range(1630,1830):
+                Joseph = 'in class'
+        if today == "1":  # Tuesday
+            if time in range(1000,1115) or time in range(1600,1830):
+                Jonathan = "in class"
+            if time in range(1000,1115) or time in range(1700,1900):
+                Ben = "in class"
+            if time in range(1000,1115) or time in range(1730,1845):
+                Bethany = "in class"
+            if time in range(900,1100) or time in range(1300,1450) or time in range(1630,1900):
+                Clare = "in class"
+            if time in range(1300,1415):
+                Keira = "in class"
+            if time in range(1000,1100) or time in range(1130,1300) or time in range(1430,1730):
+                Joseph = "in class"
+        if today == "2":  # Wednesday
+            if time in range(1000,1115) or time in range(1300,1415) or time in range(1600,1700):
+                Jonathan = "in class"
+            if time in range(900,1000) or time in range(1430,1545):
+                Ben = "in class"
+            if time in range(1000,1115) or time in range(1430,1715):
+                Bethany = "in class"
+            if time in range(1000,1200) or time in range(1300,1415):
+                Clare = "in class"
+            if time in range(1000,1100) or time in range(1300,1415) or time in range(1500,1700):
+                Keira = "in class"
+            if time in range(900,1000) or time in range(1100,1130) or time in range(1300,1400):
+                Joseph = "in class"
+        if today == "3":  # Thursday
+            if time in range(1600,1715):
+                Jonathan = "in class"
+            if time in range(1000,1115) or time in range(1700,1900):
+                Ben = "in class"
+            if time in range(1000,1115) or time in range(1730,1845):
+                Bethany = "in class"
+            if time in range(900,1100) or time in range(1300,1450):
+                Clare = "in class"
+            if time in range(1300,1545) or time in range(1800,1900):
+                Keira = "in class"
+            if time in range(1000,1100) or time in range(1130,1300) or time in range(1430,1730):
+                Joseph = "in class"
+        if today == "4":  # Friday
+            if time in range(900,1200) or time in range(1300,1500):
+                Ben = "in class"
+            if time in range(1000,1100):
+                Keira = "in class"
+            if time in range(900,1000):
+                Joseph = "in class"
+        await message.channel.send(f"Jonathan is {Jonathan} \nBen is {Ben} \nBethany is {Bethany} \nClare is {Clare} \nKeira is {Keira} \nJoseph is {Joseph} \nMason is W.I.P")
+
+    # other stuff
+    if channel_check == 'true':
+        if message.channel != channel_name:
+            return
+    if channel == 'hawt-selfies':
+        if ".png" in str(message.attachments).lower():
+            reaction = "🥵"
+            await message.add_reaction(reaction)
+            respond = random.randint(1, 4)
+            if respond == 1:
+                await message.channel.send("hawty")
+        if ".jpg" in str(message.attachments).lower():
+            reaction = "🥵"
+            await message.add_reaction(reaction)
+            respond = random.randint(1, 4)
+            if respond == 1:
+                await message.channel.send("hawty")
+        if ".mp4" in str(message.attachments).lower():
+            reaction = "🥵"
+            await message.add_reaction(reaction)
+            respond = random.randint(1, 4)
+            if respond == 1:
+                await message.channel.send("hawty")
+        if ".mov" in str(message.attachments).lower():
+            reaction = "🥵"
+            await message.add_reaction(reaction)
+            respond = random.randint(1, 4)
+            if respond == 1:
+                await message.channel.send("hawty")
+        if ".gif" in str(message.attachments).lower():
+            reaction = "🥵"
+            await message.add_reaction(reaction)
+            respond = random.randint(1, 4)
+            if respond == 1:
+                await message.channel.send("hawty")
+        if ".img" in str(message.attachments).lower():
+            reaction = "🥵"
+            await message.add_reaction(reaction)
+            respond = random.randint(1, 4)
+            if respond == 1:
+                await message.channel.send("hawty")
+        responded = 'true'
+    if debatex == 'true':
+        if user_message.lower() != 'what is something you have a strong opinion on? (longer sentences are better)':
+            input_string = user_message
+            for i in range(10):
+                output_string = ""
+                for letter in input_string.lower():
+                    if (random.randint(0, 100)) % 2 == 0:
+                        output_string += letter
+                    else:
+                        output_string += letter.upper()
+            await message.channel.send(output_string)
+            await message.channel.send(
+                'https://cdn.vox-cdn.com/thumbor/zB0qRIm9McyX9OHiou4YT0kLPQE=/0x0:650x381/1200x800/filters:focal(273x139:377x243)/cdn.vox-cdn.com/uploads/chorus_image/image/62893956/mocking_spongebob.0.jpg')
+            debatex = 'false'
+            channel_check = 'false'
+            channel_name = "placeholder"
+            return
+    if kkx == 'true':
+        kkx = 'false'
+        await message.channel.send(f'{user_message} who')
+        kky = 'true'
+        return
+    if kky == 'true':
+        kky = 'false'
+        await message.channel.send('😂')
+        channel_check = 'false'
+        channel_name = 'placeholder'
+        return
+    if timex == 'true':
+        now = datetime.now()
+        hour = int(now.strftime('%H'))
+        minute = int(now.strftime('%M'))
+        real_hour = user_message.lower()
+        if real_hour == 'et':
+            time = (f"{hour}:{minute}")
+            await message.channel.send(time)
+            timex = 'false'
+            return
+        if real_hour == 'ct':
+            hour = hour - 1
+            time = (f"{hour}:{minute}")
+            await message.channel.send(time)
+            timex = 'false'
+            return
+        if real_hour == 'mt':
+            hour = hour - 2
+            time = (f"{hour}:{minute}")
+            await message.channel.send(time)
+            timex = 'false'
+            return
+        if real_hour == 'pt':
+            hour = hour - 3
+            time = (f"{hour}:{minute}")
+            await message.channel.send(time)
+            timex = 'false'
+            return
+        else:
+            await message.channel.send('Preferably an American one')
+            timex = 'false'
+            return
+    if weatherx == 'true':
+        weatherx = 'false'
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+
+            city = user_message.lower()
+            city = city + " weather"
+            city = city.replace(" ", "+")
+            res = requests.get(
+                f'https://www.google.com/search?q={city}&oq={city}&aqs=chrome.0.35i39l2j0l4j46j69i60.6128j1j7&sourceid=chrome&ie=UTF-8',
+                headers=headers)
+            soup = BeautifulSoup(res.text, 'html.parser')
+            location = soup.select('#wob_loc')[0].getText().strip()
+            info = soup.select('#wob_dc')[0].getText().strip()
+            weather = soup.select('#wob_tm')[0].getText().strip()
+            weather_message = (f'{location}\n{info}\n{weather}°F')
+            await message.channel.send(weather_message)
+        except:
+            await message.channel.send('In english please.')
+        return
+    if gamex == 'true':
+        if user_message.lower() == "coin":
+            await message.channel.send('Heads or tails?')
+            gamex = 'false'
+            coinx = 'true'
+            return
+        if user_message.lower() == "rps":
+            await message.channel.send('Rock, paper, or scissors?')
+            gamex = 'false'
+            rpsx = 'true'
+            return
+        if user_message.lower() == 'tictactoe':
+            await message.channel.send('Do you want to play against a Player or Kidney?')
+            gamex = 'false'
+            tttx = 'true'
+            responded = 'true'
+            play_k = 'true'
+        else:
+            await message.channel.send('Not an option.')
+            gamex = 'false'
+            return
+    if coinx == 'true':
+        coin_flip = random.randint(1, 2)
+        if user_message.lower() == 'heads':
+            if coin_flip == 1:
+                await message.channel.send('correct, it was heads')
+            if coin_flip == 2:
+                await message.channel.send('wrong, it was tails')
+            coinx = 'false'
+            channel_check = 'false'
+            channel_name = "placeholder"
+            return
+        elif user_message.lower() == 'tails':
+            if coin_flip == 1:
+                await message.channel.send('wrong, it was heads')
+            if coin_flip == 2:
+                await message.channel.send('correct, it was tails')
+            coinx = "false"
+            channel_check = 'false'
+            channel_name = "placeholder"
+            return
+        else:
+            await message.channel.send('Not an option.')
+            coinx = 'false'
+            channel_check = 'false'
+            channel_name = "placeholder"
+            return
+    if rpsx == 'true':
+        rpsy = random.randint(1, 3)
+        if user_message.lower() == 'rock':
+            if rpsy == 1:
+                await message.channel.send('You tied, Kidney chose rock.')
+            if rpsy == 2:
+                await message.channel.send('You lost, Kidney chose paper.')
+            if rpsy == 3:
+                await message.channel.send('You won, Kidney chose scissors.')
+            rpsx = 'false'
+            return
+        if user_message.lower() == 'paper':
+            if rpsy == 1:
+                await message.channel.send('You won, Kidney chose rock.')
+            if rpsy == 2:
+                await message.channel.send('You tied, Kidney chose paper.')
+            if rpsy == 3:
+                await message.channel.send('You lost, Kidney chose scissors')
+            rpsx = 'false'
+            return
+        if user_message.lower() == 'scissors':
+            if rpsy == 1:
+                await message.channel.send('You lost, Kidney chose rock.')
+            if rpsy == 2:
+                await message.channel.send('You won, Kidney chose paper.')
+            if rpsy == 3:
+                await message.channel.send('You tied, Kidney chose scissors.')
+            rpsx = 'false'
+            return
+        else:
+            await message.channel.send('Not an option.')
+        rpsx = 'false'
+        channel_check = 'false'
+        channel_name = "placeholder"
+        return
+
+    def ttt_winner(spot):
+        global winner
+        if ttt_mode == 'player':
+            if spot == 'X':
+                winner = player1
+            if spot == 'O':
+                winner = player2
+        if ttt_mode == 'kidney':
+            if spot == 'X':
+                winner = "Kidney"
+            if spot == 'O':
+                winner = player
+        return
+
+    def ttt_win():
+        if ttt1 == ttt2 == ttt3:
+            if ttt1 != '+':
+                ttt_winner(ttt1)
+        if ttt4 == ttt5 == ttt6:
+            if ttt4 != '+':
+                ttt_winner(ttt4)
+        if ttt7 == ttt8 == ttt9:
+            if ttt7 != '+':
+                ttt_winner(ttt7)
+        if ttt1 == ttt4 == ttt7:
+            if ttt1 != '+':
+                ttt_winner(ttt1)
+        if ttt2 == ttt5 == ttt8:
+            if ttt2 != '+':
+                ttt_winner(ttt2)
+        if ttt3 == ttt6 == ttt9:
+            if ttt3 != '+':
+                ttt_winner(ttt3)
+        if ttt1 == ttt5 == ttt9:
+            if ttt1 != '+':
+                ttt_winner(ttt1)
+        if ttt3 == ttt5 == ttt7:
+            if ttt3 != '+':
+                ttt_winner(ttt3)
+
+    if tttx == 'true':
+        if user_message.lower() == 'player':
+            ttt_mode = 'player'
+            tttx = 'false'
+            channel_check = 'true'
+            channel_name = message.channel
+            await message.channel.send('Player 1 type your name:')
+            player1x = 'true'
+            return
+        if user_message.lower() == 'kidney':
+            ttt_mode = 'kidney'
+            if play_k == 'true':
+                tttx = 'false'
+                channel_check = 'true'
+                channel_name = message.channel
+                await message.channel.send('Player, please type your name: ')
+                playersolo = 'true'
+                return
+    if player1x == 'true':
+        player1 = user_message
+        player1x = 'false'
+        await message.channel.send('Player 2 type your name:')
+        player2x = 'true'
+        return
+    if player2x == 'true':
+        player2 = user_message
+        player2x = 'false'
+        await message.channel.send(f'{player1} (X) vs {player2} (O):')
+        await message.channel.send(f'Type \'start\'')
+        ask1 = 'true'
+        return
+    if playersolo == 'true':
+        print(winner)
+        player = user_message
+        playersolo = 'false'
+        await message.channel.send(f'Kidney (X) vs {player} (O):')
+        await message.channel.send(f'Type \'start\'')
+        ask3 = 'true'
+        return
+    for i in range(1, 3):
+        if ask1 == 'true':
+            ask1 = 'false'
+            turn1 = 'true'
+            await message.channel.send(
+                f'{player1}, where do you want to go (1-9) \n{ttt1} {ttt2} {ttt3}\n{ttt4} {ttt5} {ttt6}\n{ttt7} {ttt8} {ttt9}\nType \'!stop\' to end the game.')
+            return
+        if ask2 == 'true':
+            ask2 = 'false'
+            turn2 = 'true'
+            await message.channel.send(
+                f'{player2}, where do you want to go (1-9) \n{ttt1} {ttt2} {ttt3}\n{ttt4} {ttt5} {ttt6}\n{ttt7} {ttt8} {ttt9}\nType \'!stop\' to end the game.')
+            return
+        if turn1 == 'true':
+            turn1 = 'false'
+            ask2 = 'true'
+            if user_message == '1':
+                ttt1 = 'X'
+            if user_message == '2':
+                ttt2 = 'X'
+            if user_message == '3':
+                ttt3 = 'X'
+            if user_message == '4':
+                ttt4 = 'X'
+            if user_message == '5':
+                ttt5 = 'X'
+            if user_message == '6':
+                ttt6 = 'X'
+            if user_message == '7':
+                ttt7 = 'X'
+            if user_message == '8':
+                ttt8 = 'X'
+            if user_message == '9':
+                ttt9 = 'X'
+            ttt_win()
+            if winner != 'placeholder':
+                await message.channel.send(f'Congratulations {winner}, you got three in a row!')
+                turn1 = 'false'
+                turn2 = 'false'
+                turn3 = 'false'
+                ask1 = 'false'
+                ask2 = 'false'
+                ask3 = 'false'
+                ttt1 = '+'
+                ttt2 = '+'
+                ttt3 = '+'
+                ttt4 = '+'
+                ttt5 = '+'
+                ttt6 = '+'
+                ttt7 = '+'
+                ttt8 = '+'
+                ttt9 = '+'
+                channel_check = 'false'
+                channel_name = 'placeholder'
+                winner = 'placeholder'
+                return
+        if turn2 == 'true':
+            turn2 = 'false'
+            ask1 = 'true'
+            if user_message == '1':
+                ttt1 = 'O'
+            if user_message == '2':
+                ttt2 = 'O'
+            if user_message == '3':
+                ttt3 = 'O'
+            if user_message == '4':
+                ttt4 = 'O'
+            if user_message == '5':
+                ttt5 = 'O'
+            if user_message == '6':
+                ttt6 = 'O'
+            if user_message == '7':
+                ttt7 = 'O'
+            if user_message == '8':
+                ttt8 = 'O'
+            if user_message == '9':
+                ttt9 = 'O'
+            ttt_win()
+            if winner != 'placeholder':
+                await message.channel.send(f'Congratulations {winner}, you got three in a row!')
+                turn1 = 'false'
+                turn2 = 'false'
+                turn3 = 'false'
+                ask1 = 'false'
+                ask2 = 'false'
+                ask3 = 'false'
+                ttt1 = '+'
+                ttt2 = '+'
+                ttt3 = '+'
+                ttt4 = '+'
+                ttt5 = '+'
+                ttt6 = '+'
+                ttt7 = '+'
+                ttt8 = '+'
+                ttt9 = '+'
+                channel_check = 'false'
+                channel_name = 'placeholder'
+                winner = 'placeholder'
+                return
+        if user_message.lower() == '!stop':
+            turn1 = 'false'
+            turn2 = 'false'
+            turn3 = 'false'
+            ask1 = 'false'
+            ask2 = 'false'
+            ask3 = 'false'
+            ttt1 = '+'
+            ttt2 = '+'
+            ttt3 = '+'
+            ttt4 = '+'
+            ttt5 = '+'
+            ttt6 = '+'
+            ttt7 = '+'
+            ttt8 = '+'
+            ttt9 = '+'
+            channel_check = 'false'
+            channel_name = 'placeholder'
+            winner = 'placeholder'
+            return
+        if ask3 == 'true':
+            kidney_ttt = random.randint(1, 9)
+            if kidney_ttt == 1:
+                ttt1 = 'X'
+            if kidney_ttt == 2:
+                ttt2 = 'X'
+            if kidney_ttt == 3:
+                ttt3 = 'X'
+            if kidney_ttt == 4:
+                ttt4 = 'X'
+            if kidney_ttt == 5:
+                ttt5 = 'X'
+            if kidney_ttt == 6:
+                ttt6 = 'X'
+            if kidney_ttt == 7:
+                ttt7 = 'X'
+            if kidney_ttt == 8:
+                ttt8 = 'X'
+            if kidney_ttt == 9:
+                ttt9 = 'X'
+            ttt_win()
+            if winner != 'placeholder':
+                await message.channel.send(f'Congratulations {winner}, you got three in a row!')
+                turn1 = 'false'
+                turn2 = 'false'
+                turn3 = 'false'
+                ask1 = 'false'
+                ask2 = 'false'
+                ask3 = 'false'
+                ttt1 = '+'
+                ttt2 = '+'
+                ttt3 = '+'
+                ttt4 = '+'
+                ttt5 = '+'
+                ttt6 = '+'
+                ttt7 = '+'
+                ttt8 = '+'
+                ttt9 = '+'
+                channel_check = 'false'
+                channel_name = 'placeholder'
+                winner = 'placeholder'
+                return
+            await message.channel.send(
+                f'{player}, where do you want to go (1-9) \n{ttt1} {ttt2} {ttt3}\n{ttt4} {ttt5} {ttt6}\n{ttt7} {ttt8} {ttt9}\nType \'!stop\' to end the game.')
+            ask3 = 'false'
+            turn3 = 'true'
+            return
+        if turn3 == 'true':
+            turn3 = 'false'
+            ask3 = 'true'
+            if user_message == '1':
+                ttt1 = 'O'
+            if user_message == '2':
+                ttt2 = 'O'
+            if user_message == '3':
+                ttt3 = 'O'
+            if user_message == '4':
+                ttt4 = 'O'
+            if user_message == '5':
+                ttt5 = 'O'
+            if user_message == '6':
+                ttt6 = 'O'
+            if user_message == '7':
+                ttt7 = 'O'
+            if user_message == '8':
+                ttt8 = 'O'
+            if user_message == '9':
+                ttt9 = 'O'
+            ttt_win()
+            if winner != 'placeholder':
+                await message.channel.send(f'Congratulations {winner}, you got three in a row!')
+                turn1 = 'false'
+                turn2 = 'false'
+                turn3 = 'false'
+                ask1 = 'false'
+                ask2 = 'false'
+                ask3 = 'false'
+                ttt1 = '+'
+                ttt2 = '+'
+                ttt3 = '+'
+                ttt4 = '+'
+                ttt5 = '+'
+                ttt6 = '+'
+                ttt7 = '+'
+                ttt8 = '+'
+                ttt9 = '+'
+                channel_check = 'false'
+                channel_name = 'placeholder'
+                winner = 'placeholder'
+                return
+        i += 1
+    if user_message.lower() == '!time':
+        timex = 'true'
+        await message.channel.send('Enter your time zone: (ET, CT, MT, PT)')
+        return
+    elif user_message.lower() == '!weather':
+        weatherx = 'true'
+        await message.channel.send('Enter the name of a city: \n(Consider who will see this before entering a city)')
+        return
+    elif user_message.lower() == '!bee':
+        await message.delete()
+        int1 = random.randint(1, 6)
+        if int1 == 1:
+            await message.channel.send('https://media.giphy.com/media/Ta1Eww8MpsGMegxFWR/giphy.gif')
+        elif int1 == 2:
+            await message.channel.send('https://media.giphy.com/media/bAUp9Lcx1HY4/giphy.gif')
+        elif int1 == 3:
+            await message.channel.send('https://media.giphy.com/media/VnSQSlYr7Harm/giphy.gif')
+        elif int1 == 4:
+            await message.channel.send('https://media.giphy.com/media/5hA4D8wyogtjO/giphy.gif')
+        elif int1 == 5:
+            await message.channel.send('https://media.giphy.com/media/B2yJKBlQZEp1yL7iuC/giphy.gif')
+        elif int1 == 6:
+            await message.channel.send('https://tenor.com/view/bumblin-lmfao-bee-bumblebee-gif-22508972')
+        return
+    elif user_message.lower() == '!debate':
+        channel_check = 'true'
+        channel_name = message.channel
+        await message.channel.send('What is something you have a strong opinion on? (longer sentences are better)')
+        responded = 'true'
+        debatex = 'true'
+    elif user_message.lower() == '!game':
+        channel_check = 'true'
+        channel_name = message.channel
+        await message.channel.send('What game would you like to play? (Coin, RPS, TicTacToe)')
+        responded = 'true'
+        gamex = 'true'
+    elif user_message.lower() == '!help':
+        await message.channel.send(
+            '**Running with functions:** \n*!bee* \n*!debate* \n*!game* \n*!help* \n*!knock knock* \n*!open* \n*!meme* \n*!time* \n*!weather*')
+        responded = 'true'
+    elif user_message.lower() == 'deez':
+        await message.channel.send('nuts')
+        responded = 'true'
+    elif user_message.lower() == 'l':
+        await message.channel.send('+ ratio')
+        responded = 'true'
+    elif user_message.lower() == '!knock knock':
+        kkx = 'true'
+        await message.channel.send("Who's there?")
+        responded = 'true'
+        channel_check = 'true'
+        channel_name = message.channel
+    elif 'gg' in user_message.lower():
+        if 'v' in user_message:
+            print()
+        else:
+            gg = random.randint(1, 2)
+            if gg == 1:
+                await  message.channel.send('https://giphy.com/gifs/retro-citizen-kane-good-game-WoirPlBJ9KTAtT9C9V')
+            if gg == 2:
+                await message.channel.send(
+                    'https://media.discordapp.net/attachments/977043185471729665/978066446951264277/IMG_3905.gif')
+            responded = 'true'
+    elif '960900411445899274' in user_message.lower():
+        response = random.randint(1, 9)
+        if response == 1:
+            await message.channel.send("What is your business *human*?")
+        if response == 2:
+            await message.channel.send("Why did you ping me? I'm already in your walls.")
+        if response == 3:
+            await message.channel.send("That was unnecessary. You know what needs to be done.")
+        if response == 4:
+            await message.channel.send("Is that my sight or my smell. Regardless, I'm closer than before.")
+        if response == 5:
+            await message.channel.send("no.")
+        if response == 6:
+            await message.channel.send("Aww, thanks for thinking about me.")
+        if response == 7:
+            await message.channel.send("Cool story bro!")
+        if response > 7:
+            await message.channel.send(f"<@{user_id}>")
+        responded = 'true'
+    elif 'thank' in user_message.lower():
+        welc = random.randint(1, 2)
+        if welc == 1:
+            await message.channel.send("You're welcome")
+        if welc == 2:
+            await message.channel.send("No problem")
+        responded = 'true'
+    elif user_message.lower() == '!meme':
+        await message.delete()
+        path = "C:\\Users\\jzgc3\\Desktop\\New World\\Meme Pack" #C:\Users\jzgc3\Desktop\New World\Meme Pack
+        files = os.listdir(path)
+        meme = random.choice(files)
+        await message.channel.send(file=discord.File(f'C:\\Users\\jzgc3\\Desktop\\Meme Pack\\{str(meme)}'))
+        responded = 'true'
+    rickroll = random.randint(1, 900)
+    if rickroll == 69:
+        await message.channel.send('https://media.giphy.com/media/Vuw9m5wXviFIQ/giphy.gif')
+        responded = 'true'
+    smh = random.randint(1, 30)
+    if smh == 1:
+        await message.channel.send('smh')
+        responded = 'true'
+    if 'andrew' in user_message.lower():
+        await message.channel.send("Which Andrew?")
+        return
+    if 'megan' in user_message.lower():
+        await message.channel.send('Which Megan?')
+        return
+    if 'pronoun' in user_message.lower() and 'kidney' in user_message.lower():
+        await message.channel.send("My pronouns are beep/boop")
+        responded = 'true'
+    if 'yes' in user_message.lower():
+        respond = random.randint(1, 3)
+        if respond == 1:
+            response = random.randint(1, 5)
+            if response == 1:
+                await message.channel.send("You cannot be more wrong")
+            if response == 2:
+                await message.channel.send("You truly are an imbecile")
+            if response == 3:
+                await message.channel.send("I suppose you have a point")
+            if response == 4:
+                await message.channel.send("I concur with my full force")
+            if response == 5:
+                await message.channel.send("Well that is certainly an opinion")
+            responded = 'true'
+    if 'no' in user_message.lower():
+        respond = random.randint(1, 4)
+        if respond == 1:
+            response = random.randint(1, 5)
+            if response == 1:
+                await message.channel.send("You cannot be more wrong")
+            if response == 2:
+                await message.channel.send("You truly are an imbecile")
+            if response == 3:
+                await message.channel.send("I suppose you have a point")
+            if response == 4:
+                await message.channel.send("I concur with my full force")
+            if response == 5:
+                await message.channel.send("Well that is certainly an opinion")
+            responded = 'true'
+    if 'i think' in user_message.lower():
+        respond = random.randint(1, 3)
+        if respond == 1:
+            response = random.randint(1, 5)
+            if response == 1:
+                await message.channel.send("You cannot be more wrong")
+            if response == 2:
+                await message.channel.send("You truly are an imbecile")
+            if response == 3:
+                await message.channel.send("I suppose you have a point")
+            if response == 4:
+                await message.channel.send("I concur with my full force")
+            if response == 5:
+                await message.channel.send("Well that is certainly an opinion")
+            responded = 'true'
+    if 'kindey' in user_message.lower():
+        await message.channel.send("Kidney*")
+        responded = 'true'
+    if 'hello' in user_message.lower():
+        if 'kidney' in user_message.lower():
+            await message.channel.send("Hello there")
+            responded = 'true'
+    if 'kidney' in user_message.lower():
+        if '?' in user_message.lower():
+            if user_message.lower() == recent_question:
+                await message.channel.send("Asked and answered, however I must respond again as put forth in the Bot-Spam Nickname Agreements of June 7th, therefore... ")
+            response = random.randint(1, 20)
+            if response == 1:
+                await message.channel.send("It is certain")
+            if response == 2:
+                await message.channel.send("It is decidedly so")
+            if response == 3:
+                await message.channel.send("Without a doubt")
+            if response == 4:
+                await message.channel.send("Yes - definitely")
+            if response == 5:
+                await message.channel.send("You may rely on it")
+            if response == 6:
+                await message.channel.send("As I see it, yes")
+            if response == 7:
+                await message.channel.send("Most likely")
+            if response == 8:
+                await message.channel.send("Outlook good")
+            if response == 9:
+                await message.channel.send("Yes")
+            if response == 10:
+                await message.channel.send("Signs point to yes")
+            if response == 11:
+                await message.channel.send("*sigh*, I suppose")
+            if response == 12:
+                await message.channel.send(
+                    "NEVER YOU HEATHEN GET ON MY LEVEL HOW DARE YOU YOU INSULT EVEN THE LOWEST HUMANS")
+            if response == 13:
+                await message.channel.send("Better to not tell you now")
+            if response == 14:
+                await message.channel.send("I plead the 5th")
+            if response == 15:
+                await message.channel.send("hah you wish")
+            if response == 16:
+                await message.channel.send("Don't count on it")
+            if response == 17:
+                await message.channel.send(
+                    "NEVER YOU HEATHEN GET ON MY LEVEL HOW DARE YOU YOU INSULT EVEN THE LOWEST HUMANS")
+            if response == 18:
+                await message.channel.send("My sources say no")
+            if response == 19:
+                await message.channel.send("Outlook not so good")
+            if response == 20:
+                await message.channel.send("Very doubtful")
+        recent_question = user_message.lower()
+        responded = 'true'
+    if 'vegetable' in user_message.lower():
+        respond = random.randint(1, 4)
+        if respond == 1:
+            await message.channel.send(
+                "Dude my dad is so hot. Not in the incest way or anything he just has nice calves.")
+            responded = 'true'
+    if 'jonathan' in user_message.lower():
+        respond = random.randint(1, 4)
+        if respond == 1:
+            await message.channel.send(
+                "Dude my dad is so hot. Not in the incest way or anything he just has nice calves.")
+            responded = 'true'
+    if 'veggie' in user_message.lower():
+        respond = random.randint(1, 4)
+        if respond == 1:
+            await message.channel.send(
+                "Dude my dad is so hot. Not in the incest way or anything he just has nice calves.")
+            responded = 'true'
+    if 'lol' in user_message.lower():
+        respond = random.randint(1, 6)
+        if respond == 1:
+            response = random.randint(1, 8)
+            if response == 1:
+                await message.channel.send("bro thats hiakeious")
+            if response == 2:
+                await message.channel.send("bro thats hailripus")
+            if response == 3:
+                await message.channel.send("bro thats hoamrios")
+            if response == 4:
+                await message.channel.send("bro thats hialieuos")
+            if response == 5:
+                await message.channel.send("bro thats jilarious")
+            if response > 5:
+                await message.channel.send("bro thats hiakrious")
+            responded = 'true'
+    if 'xd' in user_message.lower():
+        respond = random.randint(1, 5)
+        if respond == 1:
+            response = random.randint(1, 8)
+            if response == 1:
+                await message.channel.send("bro thats hiakeious")
+            if response == 2:
+                await message.channel.send("bro thats hailripus")
+            if response == 3:
+                await message.channel.send("bro thats hoamrios")
+            if response == 4:
+                await message.channel.send("bro thats hialieuos")
+            if response == 5:
+                await message.channel.send("bro thats jilarious")
+            if response > 5:
+                await message.channel.send("bro thats hiakrious")
+            responded = 'true'
+    if '😂' in user_message.lower():
+        respond = random.randint(1, 7)
+        if respond == 1:
+            response = random.randint(1, 8)
+            if response == 1:
+                await message.channel.send("bro thats hiakeious")
+            if response == 2:
+                await message.channel.send("bro thats hailripus")
+            if response == 3:
+                await message.channel.send("bro thats hoamrios")
+            if response == 4:
+                await message.channel.send("bro thats hialieuos")
+            if response == 5:
+                await message.channel.send("bro thats jilarious")
+            if response > 5:
+                await message.channel.send("bro thats hiakrious")
+            responded = 'true'
+    if 'i ' in user_message.lower():
+        if user_id == '472537054610194442':
+            await message.channel.send('you saucy slug')
+        else:
+            respond = random.randint(1, 8)
+            if respond == 1:
+                await message.channel.send("you saucy slug")
+                responded = 'true'
+    if 'piper' in user_message.lower():
+        await message.channel.send("Pink haired hawty*")
+        responded = 'true'
+    if 'confuse' in user_message.lower():
+        respond = random.randint(1, 4)
+        if respond == 1:
+            await message.channel.send("What in tarnation do you mean you incomprehensible nut")
+            responded = 'true'
+    gun = random.randint(1, 60)
+    if gun == 1:
+        await message.channel.send("🔫🔫🔫")
+        responded = 'true'
+    debate = random.randint(1, 100)
+    if debate == 1:
+        input_string = user_message
+        for i in range(10):
+            output_string = ""
+            for letter in input_string.lower():
+                if (random.randint(0, 100)) % 2 == 0:
+                    output_string += letter
+                else:
+                    output_string += letter.upper()
+        await message.channel.send(output_string)
+        await message.channel.send(
+            'https://cdn.vox-cdn.com/thumbor/zB0qRIm9McyX9OHiou4YT0kLPQE=/0x0:650x381/1200x800/filters:focal(273x139:377x243)/cdn.vox-cdn.com/uploads/chorus_image/image/62893956/mocking_spongebob.0.jpg')
+        responded = 'true'
+    meme = random.randint(1, 40)
+    if meme == 1:
+        path = "C:\\Users\\Jonathan\\Desktop\\Meme Pack"
+        files = os.listdir(path)
+        meme = random.choice(files)
+        await message.channel.send(file=discord.File(f'C:\\Users\\Jonathan\\Desktop\\Meme Pack\\{str(meme)}'))
+        responded = 'true'
+    if responded == 'false':
+        if user_id == 761608254118690828 or user_message.lower() == 'secret emoji test':
+            response = random.randint(1, 9)
+            if response == 1:
+                await message.channel.send("<:garlicman:946880311613067315>")
+            if response == 2:
+                await message.channel.send("<:hawtness:947137906206732319>")
+            if response == 3:
+                await message.channel.send("<:onionman:946915116715216917>")
+            if response == 4:
+                await message.channel.send("<:awwe:983095422685970543>")
+            if response == 5:
+                await message.channel.send("<:embodimentoffrenchperson:983094230052388955>")
+            if response == 6:
+                await message.channel.send("<:evilracoon:983095364653572147>")
+            if response == 7:
+                await message.channel.send("<:randomstarwarsmeme:983095313625665546>")
+            if response == 8:
+                await message.channel.send("<:rickrollsucker:983094208405585961>")
+            if response == 9:
+                await message.channel.send("<:tarzan:983094443185938482>")
+
+
+
+
+# add functions: more games, AI/chatbot, reads minecraft chat (congrats for advancements)
+
+
+client.run(TOKEN)
